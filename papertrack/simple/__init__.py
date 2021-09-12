@@ -29,9 +29,17 @@ class SimpleDownloader:
 @register_collector
 class SimpleCollector:
     name = "simple"
-    params = {}
-    def __init__(self):
-        pass
+    params = {
+        "author": {
+            "type": "list",
+            "description": "Specify list of authors"
+        }
+    }
+    def __init__(self, author):
+        self.authors = author
     def collect(self, location):
         print("Collecting from %s" % location)
+        print("Specified authors:")
+        for author in self.authors:
+            print(author)
         # operate with database here 

@@ -57,7 +57,7 @@ def _convert_type(value, type):
     elif type in ["bool", "boolean"]:
         return bool(value)
     elif type == "list":
-        return list(value)
+        return value
     else:
         raise TypeError("Wrong type")
 

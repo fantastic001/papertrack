@@ -23,8 +23,20 @@ def get_component_parser(name, type):
     component = get_component_class(name, type)
     parser = argparse.ArgumentParser(prog=f"papertrack ... --{type} {component.name}")
     for param, definition in component.params.items():
+        additional_config = {}
+        if definition["type"] == "list":
+            additional_config = {
+                "action": "extend",
+                "nargs": "+"
+            }
         arg_name = "--download-%s" % param if type == "downloader" else "--%s" % param
-        parser.add_argument(arg_name, help=definition.get("description", ""), choices=definition.get("choices", None), default=definition.get("default", None))
+        parser.add_argument(
+            arg_name, 
+            help=definition.get("description", ""), 
+            choices=definition.get("choices", None), 
+            default=definition.get("default", None),
+            **additional_config
+        )
 
     return parser
 
