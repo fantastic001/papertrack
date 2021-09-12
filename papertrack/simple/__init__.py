@@ -19,9 +19,11 @@ class SimpleDownloader:
     }
     def __init__(self, url, tool):
         self.url = url
+        self.tool = tool
     
     def download(self):
         print("Downloading from %s" % self.url)
+        print("  Tool used: %s" % self.tool)
         return "/sample/location.pdf"
 
 @register_collector

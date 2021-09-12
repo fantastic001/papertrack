@@ -1,5 +1,6 @@
 
 
+import collections
 from typing import Collection
 from functools import partial
 
@@ -35,7 +36,16 @@ def simple_ask_fn(name, param_type, description, choices: list) -> str:
                 value = None
         else:
             print("%s (%s)" % (name, description),)
-            value = input("> ")
+            if param_type == "list":
+                resulting_list = [] 
+                item = None
+                while item != "q":
+                    item = input("Enter value for the list (enter 'q' and press ENTER to finish) >")
+                    if item != "q":
+                        resulting_list.append(item)
+                value = resulting_list
+            else:
+                value = input("> ")
     return value
 
 
@@ -46,10 +56,12 @@ def _convert_type(value, type):
         return int(value)
     elif type in ["bool", "boolean"]:
         return bool(value)
+    elif type == "list":
+        return list(value)
     else:
         raise TypeError("Wrong type")
 
-def _get_component_class(name, type):
+def get_component_class(name, type):
     components = None
     if type == "downloader":
         components = _DOWNLOADERS
@@ -68,7 +80,7 @@ def _get_component_class(name, type):
     return result
 
 def _get_component_instance(name, ask_param_fn, type, **params):
-    result = _get_component_class(name, type)
+    result = get_component_class(name, type)
     config = {}
     for param, definition in result.params.items():
         if "default" not in definition and param not in params:
@@ -82,12 +94,19 @@ def _get_component_instance(name, ask_param_fn, type, **params):
         elif "default" in definition and param not in params:
             config[param] = _convert_type(value, definition["type"])
         else:
-            config[param] = _convert_type(value, params[param])
+            config[param] = _convert_type(params[param], definition.get("type", "str"))
     return result(**config)
     
 get_downloader_instance = partial(_get_component_instance,  type="downloader")
 get_collector_instance = partial(_get_component_instance,  type="collector")
 get_viewer_instance = partial(_get_component_instance,  type="viewer")
 
-
-
+def get_all_components(type):
+    if type == "downloader":
+        return _DOWNLOADERS
+    elif type == "collector":
+        return _COLLECTORS
+    elif type == "viewer":
+        return _VIEWERS
+    else:
+        raise TypeError("Wrong type")
