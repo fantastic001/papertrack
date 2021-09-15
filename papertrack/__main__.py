@@ -64,7 +64,9 @@ if args.group == "get":
     collector = get_collector_instance(args.collector, simple_ask_fn, **collector_config)
 
     location = downloader.download()
-    collector.collect(location)
+    db = Database()
+    entry = collector.collect(location)
+    db.save(entry)
 
 elif args.group == "view":
     pass

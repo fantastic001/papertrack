@@ -6,6 +6,7 @@ import collections
 from genericpath import exists
 from papertrack.core import *
 import os 
+from papertrack.core import Database, DatabaseEntry
 
 @register_downloader
 class SimpleDownloader:
@@ -87,9 +88,20 @@ class SimpleCollector:
         import shutil
         print("Collecting from %s" % location)
         os.makedirs(os.path.join(self.location, self.field, self.category), exist_ok=True)
-        shutil.move(location, os.path.join(
+        destination = os.path.join(
             self.location,
             self.field,
             self.category,
             f"{self._convert_authors(self.authors)} - {self.title} ({self.year}).pdf"
-        ))
+        )
+        shutil.move(location, destination)
+        return DatabaseEntry(
+            title=self.title,
+            authors=self.authors,
+            publicationYear=self.year,
+            path=destination,
+            url="",
+            status=None,
+            field=self.field,
+            category=self.category
+        )
