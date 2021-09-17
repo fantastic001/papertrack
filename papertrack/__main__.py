@@ -1,5 +1,6 @@
 
 from ast import Param
+from papertrack.core.Loggable import Loggable
 from papertrack .simple import * 
 from papertrack.core import * 
 import argparse
@@ -62,6 +63,10 @@ if args.group == "get":
 
     downloader = get_downloader_instance(args.downloader, simple_ask_fn, **downloader_config)
     collector = get_collector_instance(args.collector, simple_ask_fn, **collector_config)
+    os.makedirs(os.path.join(os.environ["HOME"], ".papertrack"), exist_ok=True)
+    journal_location = os.path.join(os.environ["HOME"], ".papertrack", "journal.json")
+    downloader = Loggable(downloader, journal_location)
+    collector = Loggable(collector, journal_location)
 
     location = downloader.download()
     db = Database()
