@@ -33,7 +33,7 @@ def get_component_parser(name, type):
         arg_name = "--download-%s" % param if type == "downloader" else "--%s" % param
         parser.add_argument(
             arg_name, 
-            help=definition.get("description", ""), 
+            help=definition.get("description", "") + " (Default: " + definition.get("default", "none") + ")", 
             choices=definition.get("choices", None), 
             default=definition.get("default", None),
             **additional_config

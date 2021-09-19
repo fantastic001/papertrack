@@ -6,7 +6,7 @@ import collections
 from genericpath import exists
 from papertrack.core import *
 import os 
-from papertrack.core import Database, DatabaseEntry
+from papertrack.core import Database, DatabaseEntry, Configuration, Field, get_configuration
 
 @register_downloader
 class SimpleDownloader:
@@ -58,16 +58,18 @@ class SimpleCollector:
         },
         "category": {
             "type": "string",
-            "description": "Select category (e.g. distributed systems)"
+            "description": "Select category (e.g. distributed systems)",
+            "default": get_configuration(name).get_default_field().default_category
         },
         "field": {
             "type": "string",
-            "description": "Select field of study (e.g. Computer Science)"
+            "description": "Select field of study (e.g. Computer Science)",
+            "default": get_configuration(name).get_default_field().name
         },
         "location": {
             "type": "string",
             "description": "Path where the papers are stored (with categories as subdirs and fields as their subdirs)",
-            "default": "/data/Documents/Library/Papers"
+            "default": get_configuration(name).get_storage_location()
         }
     }
     def __init__(self, author: list, title: str, year: int, category, field, location):
