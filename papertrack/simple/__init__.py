@@ -103,7 +103,7 @@ class SimpleCollector:
             publicationYear=self.year,
             path=destination,
             url="",
-            status=None,
+            status=get_configuration(self.name).get_default_document_state(),
             field=self.field,
             category=self.category
         )

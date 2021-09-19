@@ -20,7 +20,7 @@ class Configuration:
           "DONE": {}
 	},
 	"default_state": "READY",
-	"storage_location": "/home/user/MyPapers/",
+	"storage_location": os.path.join(os.environ["HOME"], "Documents"),
 	"fields": {
 		  "Computer Science": {
 			    "default": "Algorithms",
