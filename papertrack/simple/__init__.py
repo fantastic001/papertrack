@@ -4,6 +4,7 @@
 from collections import UserList
 import collections
 from genericpath import exists
+from typing import List
 from papertrack.core import *
 import os 
 from papertrack.core import Database, DatabaseEntry, Configuration, Field, get_configuration
@@ -107,3 +108,22 @@ class SimpleCollector:
             field=self.field,
             category=self.category
         )
+
+@register_viewer
+class SimpleViewer:
+    name = "simple"
+    params = {
+        "location": {
+            "type": "string",
+            "description": "Path where PDFs are stored",
+            "default": get_configuration(name).get_storage_location()
+        },
+    }
+    def __init__(self, location: str):
+        self.location = location
+    
+    def view(self, entries: List[DatabaseEntry]):
+        for x in entries:
+            print(
+                f"{x.title}"
+            )

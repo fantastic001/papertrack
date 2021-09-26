@@ -27,7 +27,8 @@ class Configuration:
 			    "categories": ["Algorithms", "Theory"]
 		  }
 	},
-	"default_field": "Computer Science"
+	"default_field": "Computer Science",
+    "metadata_location": os.path.join(os.environ["HOME"], ".papertrack", "metadata.json")
 }
 
     def __init__(self, configuration_dictionary = {}):
@@ -69,6 +70,11 @@ class Configuration:
             if field.name == default_field_name:
                 return field 
         raise ValueError("Default field in configuration is not contained in fields definition")
+    
+    def get_metadata_db_location(self) -> str:
+        return self.configuration_dictionary.get("metadata_location", self.default_configuration["metadata_location"])
+        
+
 
 def get_configuration(collector_name: str = None) -> Configuration:
     config_dict = {} 

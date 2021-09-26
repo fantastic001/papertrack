@@ -18,6 +18,12 @@ for group_name in ["collector", "downloader", "viewer"]:
 get_group.add_argument("--downloader", choices=list(downloader.name for downloader in get_all_components("downloader")))
 get_group.add_argument("--collector", choices=list(collector.name for collector in get_all_components("collector")))
 
+view_group.add_argument(
+    "--viewer", 
+    choices=list(x.name for x in get_all_components("viewer")), 
+    default="simple" if "simple" in [y.name for y in get_all_components("viewer")] else get_all_components("viewer")[0].name
+)
+
 args, rest = parser.parse_known_args()
 
 def get_component_parser(name, type):
@@ -74,7 +80,16 @@ if args.group == "get":
     db.save(entry)
 
 elif args.group == "view":
-    pass
+    viewer_parser = get_component_parser(args.viewer, type="viewer")
+    viewer_args, rest = viewer_parser.parse_known_args(rest)
+    viewer_config = {param: getattr(viewer_args, "%s" % param) for param in get_component_class(
+        args.viewer, 
+        "viewer"
+    ).params.keys() if hasattr(viewer_args, "%s" % param)}
+    viewer_config = {k:v for k,v in viewer_config.items() if v is not None}
+    viewer = get_viewer_instance(args.viewer, simple_ask_fn, **viewer_config)
+    db = Database()
+    viewer.view(db.list())
 else:
     if args.list:
         for item in get_all_components(args.group):

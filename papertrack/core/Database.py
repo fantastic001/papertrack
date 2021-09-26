@@ -38,3 +38,24 @@ class Database:
                     category = entry.category
                 ))
                 f.write(json.dumps(data))
+    def list(self):
+        os.makedirs(os.path.dirname(self.location), exist_ok=True)
+        try:
+            with open(self.location) as f:
+                try:
+                    data = json.loads(f.read())
+                except io.UnsupportedOperation:
+                    data = []
+                finally:
+                    return list(DatabaseEntry(
+                        title = x["title"],
+                        authors = x["authors"],
+                        publicationYear = x["publicationYear"],
+                        path = x["path"],
+                        url = x["url"],
+                        status = x["status"],
+                        field = x["field"],
+                        category = x["category"]
+                    ) for x in data)
+        except FileNotFoundError:
+            return []
