@@ -5,6 +5,9 @@ from collections import UserList
 import collections
 from genericpath import exists
 from typing import List
+from easy_widgets.Application import Application
+
+from easy_widgets.Menu import Menu
 from papertrack.core import *
 import os 
 from papertrack.core import Database, DatabaseEntry, Configuration, Field, get_configuration
@@ -123,7 +126,37 @@ class SimpleViewer:
         self.location = location
     
     def view(self, entries: List[DatabaseEntry]):
-        for x in entries:
-            print(
-                f"{x.title}"
-            )
+        import easy_widgets
+        import subprocess
+        easy_widgets.Application.init()
+        fields = get_configuration(self.name).get_fields()
+        field_menu = easy_widgets.Menu("Fields")
+        def open_paper(btn, p):
+            entry: DatabaseEntry = p[0]
+            print("Opening %s" % entry.path)
+            process = subprocess.Popen(["xdg-open", entry.path])
+            ret = process.wait()
+            if ret != 0:
+                print("Viewer exited with status: %d" % ret)
+            easy_widgets.Application.exit()
+        def show_papers(btn, params):
+            field = params[0]
+            category = params[1]
+            paper_menu = easy_widgets.Menu("Papers")
+            for entry in entries:
+                if entry.field == field.name and entry.category == category:
+                    paper_menu.addOption(entry.title, open_paper, params=[entry])
+            paper_menu.addOption("Back", show_categories, params=[field])
+            paper_menu.show()
+        def show_categories(btn, params):
+            field: Field = params[0]
+            category_menu = easy_widgets.Menu("Categories")
+            for category in field.categories:
+                category_menu.addOption(category, show_papers, params=[field, category])
+            category_menu.addOption("Quit", lambda b, p: easy_widgets.Application.exit())
+            category_menu.show()
+        for field in fields:
+            field_menu.addOption(field.name, show_categories, params=[field] )
+        field_menu.addOption("Quit", lambda b, p: easy_widgets.Application.exit())
+        field_menu.show()
+        easy_widgets.Application.run()
