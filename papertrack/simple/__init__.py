@@ -60,15 +60,16 @@ class SimpleCollector:
             "type": "int",
             "description": "Specify year of publication"
         },
-        "category": {
-            "type": "string",
-            "description": "Select category (e.g. distributed systems)",
-            "default": get_configuration(name).get_default_field().default_category
-        },
         "field": {
             "type": "string",
             "description": "Select field of study (e.g. Computer Science)",
-            "default": get_configuration(name).get_default_field().name
+            "choices": list(field.name for field in get_configuration(name).get_fields()),
+            # "default": get_configuration(name).get_default_field().name
+        },
+        "category": {
+            "type": "string",
+            "description": "Select category (e.g. distributed systems)",
+            # "default": get_configuration(name).get_default_field().default_category
         },
         "location": {
             "type": "string",
@@ -160,3 +161,4 @@ class SimpleViewer:
         field_menu.addOption("Quit", lambda b, p: easy_widgets.Application.exit())
         field_menu.show()
         easy_widgets.Application.run()
+

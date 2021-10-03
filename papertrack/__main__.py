@@ -4,6 +4,7 @@ from papertrack.core.Loggable import Loggable
 from papertrack .simple import * 
 from papertrack.core import * 
 import argparse
+from papertrack.curses import curses_ask_fn
 
 parser = argparse.ArgumentParser()
 subparsers = parser.add_subparsers(dest="group")
@@ -47,6 +48,15 @@ def get_component_parser(name, type):
 
     return parser
 
+ask_fn = None
+if os.environ.get("PAPERTRACK_ASK_FN", "curses") == "curses":
+    ask_fn = curses_ask_fn
+elif os.environ.get("PAPERTRACK_ASK_FN", "curses") == "cli":
+    ask_fn = simple_ask_fn
+else:
+    print("Wrong value for PAPERTRACK_ASK_FN")
+    exit(2)
+
 if args.group == "get":
     downloader_parser = get_component_parser(args.downloader, type="downloader")
     collector_parser = get_component_parser(args.collector, type = "collector")
@@ -67,8 +77,8 @@ if args.group == "get":
     downloader_config = {k:v for k,v in downloader_config.items() if v is not None}
     collector_config = {k:v for k,v in collector_config.items() if v is not None}
 
-    downloader = get_downloader_instance(args.downloader, simple_ask_fn, **downloader_config)
-    collector = get_collector_instance(args.collector, simple_ask_fn, **collector_config)
+    downloader = get_downloader_instance(args.downloader, ask_fn, **downloader_config)
+    collector = get_collector_instance(args.collector, ask_fn, **collector_config)
     os.makedirs(os.path.join(os.environ["HOME"], ".papertrack"), exist_ok=True)
     journal_location = os.path.join(os.environ["HOME"], ".papertrack", "journal.json")
     downloader = Loggable(downloader, journal_location)
@@ -87,7 +97,7 @@ elif args.group == "view":
         "viewer"
     ).params.keys() if hasattr(viewer_args, "%s" % param)}
     viewer_config = {k:v for k,v in viewer_config.items() if v is not None}
-    viewer = get_viewer_instance(args.viewer, simple_ask_fn, **viewer_config)
+    viewer = get_viewer_instance(args.viewer, ask_fn, **viewer_config)
     db = Database()
     viewer.view(db.list())
 else:
