@@ -3,6 +3,7 @@
 import collections
 from typing import Collection
 from functools import partial
+import os 
 
 _DOWNLOADERS = [] 
 _COLLECTORS = []
@@ -84,6 +85,7 @@ def _get_component_instance(name, ask_param_fn, type, **params):
     config = {}
     for param, definition in result.params.items():
         if "default" not in definition and param not in params:
+            print("%s has no default, asking..." % param)
             value = ask_param_fn(
                 param, 
                 definition.get("type", "string"), 
@@ -92,8 +94,20 @@ def _get_component_instance(name, ask_param_fn, type, **params):
             )
             config[param] = _convert_type(value, definition.get("type", "string"))
         elif "default" in definition and param not in params:
-            config[param] = _convert_type(value, definition["type"])
+            if os.environ.get("PAPERTRACK_ASK_ON_DEFAULT", "0") == "1":
+                print("%s has default, asking..." % param)
+                value = ask_param_fn(
+                    param, 
+                    definition.get("type", "string"), 
+                    definition.get("description", ""), 
+                    definition.get("choices", [])
+                )
+                config[param] = _convert_type(value, definition.get("type", "string"))
+            else:
+                print("%s has default=%s" % (param, definition["default"]))
+                config[param] = _convert_type(definition["default"], definition["type"])
         else:
+            print("%s = %s" % (param, params[param]))
             config[param] = _convert_type(params[param], definition.get("type", "str"))
     return result(**config)
     

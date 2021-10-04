@@ -62,14 +62,11 @@ class SimpleCollector:
         },
         "field": {
             "type": "string",
-            "description": "Select field of study (e.g. Computer Science)",
-            "choices": list(field.name for field in get_configuration(name).get_fields()),
-            # "default": get_configuration(name).get_default_field().name
-        },
-        "category": {
-            "type": "string",
-            "description": "Select category (e.g. distributed systems)",
-            # "default": get_configuration(name).get_default_field().default_category
+            "description": "Select field of study (e.g. Computer Science) and category (format field/category)",
+            "choices": list("%s/%s" % (field.name, cat) 
+                for field in get_configuration(name).get_fields() for cat in field.categories
+            ),
+            "default": get_configuration(name).get_default_field().name + "/" + get_configuration(name).get_default_field().default_category,
         },
         "location": {
             "type": "string",
@@ -77,12 +74,12 @@ class SimpleCollector:
             "default": get_configuration(name).get_storage_location()
         }
     }
-    def __init__(self, author: list, title: str, year: int, category, field, location):
+    def __init__(self, author: list, title: str, year: int, field, location):
         self.authors = author
         self.title = title 
         self.year = year
-        self.field = field
-        self.category = category
+        self.field = field.split("/")[0]
+        self.category = field.split("/")[1]
         self.location = location
     
     def _convert_author(self, author):
