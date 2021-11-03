@@ -21,23 +21,25 @@ class Database:
     
     def save(self, entry: DatabaseEntry):
         os.makedirs(os.path.dirname(self.location), exist_ok=True)
+        data = [] 
+        try:
+            f = open(self.location, "r")
+            data = json.loads(f.read())
+            f.close()
+        except FileNotFoundError:
+            data = []
+        data.append(dict(
+            title = entry.title,
+            authors = entry.authors,
+            publicationYear = entry.publicationYear,
+            path = entry.path,
+            url = entry.url,
+            status = entry.status,
+            field = entry.field,
+            category = entry.category
+        ))
         with open(self.location, "w") as f:
-            try:
-                data = json.loads(f.read())
-            except io.UnsupportedOperation:
-                data = []
-            finally:
-                data.append(dict(
-                    title = entry.title,
-                    authors = entry.authors,
-                    publicationYear = entry.publicationYear,
-                    path = entry.path,
-                    url = entry.url,
-                    status = entry.status,
-                    field = entry.field,
-                    category = entry.category
-                ))
-                f.write(json.dumps(data))
+            f.write(json.dumps(data))
     def list(self):
         os.makedirs(os.path.dirname(self.location), exist_ok=True)
         try:
