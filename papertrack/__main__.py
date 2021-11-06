@@ -6,11 +6,14 @@ from papertrack.core import *
 import argparse
 from papertrack.curses import curses_ask_fn
 
+journal_location = os.path.join(os.environ["HOME"], ".papertrack", "journal.json")
+
 def main():
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest="group")
     get_group = subparsers.add_parser("get")
     view_group = subparsers.add_parser("view")
+    check_group = subparsers.add_parser("check")
 
     for group_name in ["collector", "downloader", "viewer"]:
         group = subparsers.add_parser(group_name)
@@ -80,7 +83,6 @@ def main():
         downloader = get_downloader_instance(args.downloader, ask_fn, **downloader_config)
         collector = get_collector_instance(args.collector, ask_fn, **collector_config)
         os.makedirs(os.path.join(os.environ["HOME"], ".papertrack"), exist_ok=True)
-        journal_location = os.path.join(os.environ["HOME"], ".papertrack", "journal.json")
         downloader = Loggable(downloader, journal_location)
         collector = Loggable(collector, journal_location)
 
@@ -100,6 +102,9 @@ def main():
         viewer = get_viewer_instance(args.viewer, ask_fn, **viewer_config)
         db = Database()
         viewer.view(db.list())
+    elif args.group == "check":
+        db = Database()
+        db.verify_and_fix(journal_location)
     else:
         if args.list:
             for item in get_all_components(args.group):
