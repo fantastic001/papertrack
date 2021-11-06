@@ -20,7 +20,7 @@ class Database:
     def __init__(self, location = os.path.join(os.environ["HOME"], ".papertrack/metadata.json")):
         self.location = location
     
-    def save(self, entry: DatabaseEntry):
+    def _read_metadata(self):
         os.makedirs(os.path.dirname(self.location), exist_ok=True)
         data = [] 
         try:
@@ -29,6 +29,17 @@ class Database:
             f.close()
         except FileNotFoundError:
             data = []
+        return data
+
+    def _write_metadata(self,data):
+        with open(self.location, "w") as f:
+            f.write(json.dumps(data))
+    def delete(self, path):
+        self._write_metadata(list(e for e in self._read_metadata() if e["path"] != path))
+
+
+    def save(self, entry: DatabaseEntry):
+        data = self._read_metadata()
         entry_exists = False
         for i in range(0, len(data)):
             if entry.path == data[i]["path"]:
@@ -54,9 +65,7 @@ class Database:
                 field = entry.field,
                 category = entry.category
             ))
-
-        with open(self.location, "w") as f:
-            f.write(json.dumps(data))
+        self._write_metadata(data)
     def list(self) -> List[DatabaseEntry]:
         os.makedirs(os.path.dirname(self.location), exist_ok=True)
         try:
@@ -93,6 +102,11 @@ class Database:
                     print("WARNING: %s present multiple times in journal" % e.path)
                 collected_entries[e.path] = e
         for entry in self.list():
+            if not os.path.exists(entry.path):
+                print("Path for entry %s does not exist anymore, delete entry? (y/n)" % str(entry))
+                choice = input("> ")
+                if choice == "y":
+                    self.delete(entry.path)
             if entry != collected_entries.get(entry.path, entry):
                 print("Entry: %s is not equal to what is found in journal, correct it (y/n)?" % str(entry))
                 choice =  input("> ")
